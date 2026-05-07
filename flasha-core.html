@@ -2,26 +2,19 @@
 <!-- ================================================================
      🎴 Flasha Design Signature System — v4.1
      ================================================================
-     INTEGRATION GUIDE
-     ─────────────────
-     1. In <head>:
+     INTEGRATION
+     ───────────
+     1. <head>:
         <link rel="stylesheet" href="flasha-styles.css">
+        <link rel="manifest"   href="/manifest.json">
+        <meta name="theme-color" content="#a855f7">
 
-     2. Right after <body> — paste this entire block verbatim.
+     2. Right after <body> — paste this file verbatim.
 
      3. Before </body>:
         <script src="flasha-scripts.js" defer></script>
-
-     CUSTOMISATION
-     ─────────────
-     Override design tokens after the stylesheet import:
-       :root {
-         --fl-accent-a: #00d2ff;
-         --fl-accent-b: #7928ca;
-         --fl-bg:       #ffffff;
-       }
+        <script src="pwa.js"            defer></script>
      ================================================================ -->
-
 
 <!-- ╔══════════════════════════════════════════════════════════╗
      ║  A — INTRO / LOADING SCREEN                             ║
@@ -31,19 +24,15 @@
      aria-label="Flasha — Loading"
      aria-live="polite">
 
-  <!-- decorative background layers -->
   <div class="fl-intro-grid"              aria-hidden="true"></div>
   <div class="fl-intro-orb fl-intro-orb--a" aria-hidden="true"></div>
   <div class="fl-intro-orb fl-intro-orb--b" aria-hidden="true"></div>
   <div class="fl-intro-orb fl-intro-orb--c" aria-hidden="true"></div>
   <div class="fl-intro-noise"             aria-hidden="true"></div>
 
-  <!-- central stage (NOT aria-hidden — contains live progressbar) -->
   <div class="fl-intro-stage">
 
-    <!-- spinner ring + pulse + emblem -->
     <div class="fl-intro-ring-wrap" aria-hidden="true">
-
       <svg class="fl-intro-ring-svg"
            viewBox="0 0 140 140" fill="none"
            xmlns="http://www.w3.org/2000/svg">
@@ -62,10 +51,8 @@
                 stroke-linecap="round"
                 stroke="url(#fl-grad-ring)"/>
       </svg>
-
       <span class="fl-pulse-ring fl-pulse-ring--1"></span>
       <span class="fl-pulse-ring fl-pulse-ring--2"></span>
-
       <div class="fl-intro-emblem">
         <span class="fl-intro-emoji"
               role="img"
@@ -73,7 +60,6 @@
       </div>
     </div>
 
-    <!-- wordmark -->
     <div class="fl-intro-wordmark" aria-label="FLASHA" aria-hidden="true">
       <span class="fl-wm-letter" style="--d:0">F</span>
       <span class="fl-wm-letter" style="--d:1">L</span>
@@ -83,12 +69,10 @@
       <span class="fl-wm-letter" style="--d:5">A</span>
     </div>
 
-    <!-- byline (first-visit only, hidden on return via CSS) -->
     <p class="fl-intro-byline" aria-hidden="true">
       A Bespoke Creation of&nbsp;<em>Flasha</em>
     </p>
 
-    <!-- progress bar (accessible) -->
     <div class="fl-intro-bar"
          role="progressbar"
          aria-valuemin="0"
@@ -99,22 +83,20 @@
       <span class="fl-intro-bar-dot"  aria-hidden="true"></span>
     </div>
 
-    <!-- decorative corner accents -->
     <span class="fl-corner fl-corner--tl" aria-hidden="true"></span>
     <span class="fl-corner fl-corner--tr" aria-hidden="true"></span>
     <span class="fl-corner fl-corner--bl" aria-hidden="true"></span>
     <span class="fl-corner fl-corner--br" aria-hidden="true"></span>
 
-  </div><!-- /.fl-intro-stage -->
+  </div>
 
-  <!-- bottom version badge -->
   <div class="fl-intro-badge" aria-hidden="true">
     <span class="fl-badge-dot"></span>
     <span class="fl-badge-text">Design Signature System&nbsp;·&nbsp;v4.1</span>
     <span class="fl-badge-dot"></span>
   </div>
 
-</div><!-- /#fl-intro -->
+</div>
 
 
 <!-- ╔══════════════════════════════════════════════════════════╗
@@ -124,7 +106,6 @@
      role="navigation"
      aria-label="Flasha — Social Links">
 
-  <!-- glass panel -->
   <div id="fl-fab-menu"
        role="menu"
        aria-hidden="true"
@@ -134,8 +115,7 @@
 
     <div class="fl-panel-head">
       <div class="fl-panel-head-left">
-        <span class="fl-panel-emoji"
-              role="img" aria-label="Flasha">🎴</span>
+        <span class="fl-panel-emoji" role="img" aria-label="Flasha">🎴</span>
         <div class="fl-panel-brand">
           <span class="fl-panel-name">Flasha</span>
           <span class="fl-panel-tagline">Connect with me</span>
@@ -151,6 +131,34 @@
     <div class="fl-panel-divider" aria-hidden="true"></div>
 
     <ul class="fl-link-list" role="none">
+
+      <!-- PWA Install — hidden until browser fires beforeinstallprompt -->
+      <li id="fl-pwa-install-item" role="none" style="display:none">
+        <a href="#"
+           id="fl-pwa-install-btn"
+           class="fl-link fl-link--pwa"
+           role="menuitem"
+           aria-label="Install app on your device">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V4"/>
+              <path d="M8 12l4 4 4-4"/>
+              <rect x="3" y="18" width="18" height="3" rx="1.5"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">Install App</span>
+            <span class="fl-link-handle">Work offline · No browser needed</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
       <!-- YouTube -->
       <li role="none">
@@ -302,7 +310,7 @@
         </a>
       </li>
 
-    </ul><!-- /.fl-link-list -->
+    </ul>
 
     <div class="fl-panel-foot" aria-hidden="true">
       <span class="fl-panel-foot-rule"></span>
@@ -310,9 +318,8 @@
       <span class="fl-panel-foot-rule"></span>
     </div>
 
-  </div><!-- /#fl-fab-menu -->
+  </div>
 
-  <!-- FAB trigger -->
   <button id="fl-fab-btn"
           type="button"
           aria-label="Open Flasha social links"
@@ -333,7 +340,7 @@
     </span>
   </button>
 
-</div><!-- /#fl-fab-root -->
+</div>
 
 
 <!-- ╔══════════════════════════════════════════════════════════╗
