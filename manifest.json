@@ -1,12 +1,12 @@
 {
-  "name": "Flasha App",
+  "name": "Flasha App Platform",
   "short_name": "Flasha",
-  "description": "A Bespoke Creation of Flasha",
+  "description": "Premium Experimental Design Framework by Flasha",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#05050f",
-  "theme_color": "#a855f7",
+  "background_color": "#110D10",
+  "theme_color": "#8B1E47",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -21,5 +21,5 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["utilities"]
+  "categories": ["developer-tools", "design-systems"]
 }
