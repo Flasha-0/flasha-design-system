@@ -1,506 +1,365 @@
-// flasha-scripts.js
-// ============================================================
-// 🎴 Flasha Design Signature System — Scripts v4.1
-// ============================================================
+<!-- flasha-core.html -->
+<!-- ================================================================
+     🎴 Flasha Design Signature System — v4.1
+     ================================================================
+     INTEGRATION
+     ───────────
+     1. <head>:
+        <link rel="stylesheet" href="flasha-styles.css">
+        <link rel="manifest"   href="/manifest.json">
+        <meta name="theme-color" content="#a855f7">
 
-'use strict';
+     2. Right after <body> — paste this file verbatim.
 
-(() => {
+     3. Before </body>:
+        <script src="flasha-scripts.js" defer></script>
+        <script src="pwa.js"            defer></script>
+     ================================================================ -->
 
-  /* ══════════════════════════════════════════════════════════
-     § 0  CONFIG
-     ══════════════════════════════════════════════════════════ */
-  const CFG = {
-    introId:          'fl-intro',
-    fabBtnId:         'fl-fab-btn',
-    fabMenuId:        'fl-fab-menu',
-    menuOpenClass:    'fl-menu--open',
-    introOutClass:    'fl-intro--out',
-    introReturnClass: 'fl-intro--return',
-    sessionKey:       'fl_visited_v4',
-    soundKey:         'fl_sound',
-    introMinMs:       1500,
-    introFadeMs:      650,
-  };
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  A — INTRO / LOADING SCREEN                             ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="fl-intro"
+     role="status"
+     aria-label="Flasha — Loading"
+     aria-live="polite">
 
-  const LINKS = {
-    youtube:   'https://youtube.com/@flasha_0?si=Am46gTJ9Hk3lyHEV',
-    instagram: 'https://www.instagram.com/flasha_0/',
-    discord:   'https://discord.com/users/1484153478421942335',
-    whatsapp:  'https://api.whatsapp.com/send/?phone=201019953525',
-    telegram:  'https://t.me/Flasha_0',
-    github:    'https://github.com/Flasha-0',
-  };
+  <div class="fl-intro-grid"              aria-hidden="true"></div>
+  <div class="fl-intro-orb fl-intro-orb--a" aria-hidden="true"></div>
+  <div class="fl-intro-orb fl-intro-orb--b" aria-hidden="true"></div>
+  <div class="fl-intro-orb fl-intro-orb--c" aria-hidden="true"></div>
+  <div class="fl-intro-noise"             aria-hidden="true"></div>
 
-  /* ══════════════════════════════════════════════════════════
-     § 0.1  DOM HELPERS
-     ══════════════════════════════════════════════════════════ */
-  const qs  = (sel, ctx = document) => ctx.querySelector(sel);
-  const qsa = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  <div class="fl-intro-stage">
 
-  const onTransitionEnd = (el, cb, fallbackMs = 900) => {
-    let done = false;
-    const finish = () => { if (done) return; done = true; cb(); };
-    el.addEventListener('transitionend', finish, { once: true });
-    setTimeout(finish, fallbackMs);
-  };
+    <div class="fl-intro-ring-wrap" aria-hidden="true">
+      <svg class="fl-intro-ring-svg"
+           viewBox="0 0 140 140" fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="fl-grad-ring"
+                          x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="var(--fl-accent-a)"/>
+            <stop offset="50%"  stop-color="var(--fl-accent-b)"/>
+            <stop offset="100%" stop-color="var(--fl-accent-c)"/>
+          </linearGradient>
+        </defs>
+        <circle class="fl-ring-track"
+                cx="70" cy="70" r="62" stroke-width="1"/>
+        <circle class="fl-ring-arc"
+                cx="70" cy="70" r="62" stroke-width="1.5"
+                stroke-linecap="round"
+                stroke="url(#fl-grad-ring)"/>
+      </svg>
+      <span class="fl-pulse-ring fl-pulse-ring--1"></span>
+      <span class="fl-pulse-ring fl-pulse-ring--2"></span>
+      <div class="fl-intro-emblem">
+        <span class="fl-intro-emoji"
+              role="img"
+              aria-label="Flasha — flower card">🎴</span>
+      </div>
+    </div>
 
-  /* ══════════════════════════════════════════════════════════
-     § 1  SOUND PREFERENCE MANAGER
-     ══════════════════════════════════════════════════════════ */
-  const SoundPref = (() => {
-    // Respect prefers-reduced-motion as default mute
-    const motionReduced = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches;
+    <div class="fl-intro-wordmark" aria-label="FLASHA" aria-hidden="true">
+      <span class="fl-wm-letter" style="--d:0">F</span>
+      <span class="fl-wm-letter" style="--d:1">L</span>
+      <span class="fl-wm-letter" style="--d:2">A</span>
+      <span class="fl-wm-letter" style="--d:3">S</span>
+      <span class="fl-wm-letter" style="--d:4">H</span>
+      <span class="fl-wm-letter" style="--d:5">A</span>
+    </div>
 
-    let _enabled = (() => {
-      try {
-        const stored = localStorage.getItem(CFG.soundKey);
-        if (stored !== null) return stored === '1';
-      } catch (_) {}
-      return !motionReduced;
-    })();
+    <p class="fl-intro-byline" aria-hidden="true">
+      A Bespoke Creation of&nbsp;<em>Flasha</em>
+    </p>
 
-    const isEnabled = () => _enabled;
+    <div class="fl-intro-bar"
+         role="progressbar"
+         aria-valuemin="0"
+         aria-valuemax="100"
+         aria-valuenow="0"
+         aria-label="Loading">
+      <span class="fl-intro-bar-fill" aria-hidden="true"></span>
+      <span class="fl-intro-bar-dot"  aria-hidden="true"></span>
+    </div>
 
-    const set = (val) => {
-      _enabled = Boolean(val);
-      try { localStorage.setItem(CFG.soundKey, _enabled ? '1' : '0'); } catch (_) {}
-    };
+    <span class="fl-corner fl-corner--tl" aria-hidden="true"></span>
+    <span class="fl-corner fl-corner--tr" aria-hidden="true"></span>
+    <span class="fl-corner fl-corner--bl" aria-hidden="true"></span>
+    <span class="fl-corner fl-corner--br" aria-hidden="true"></span>
 
-    return { isEnabled, set };
-  })();
+  </div>
 
-  /* ══════════════════════════════════════════════════════════
-     § 2  WEB AUDIO SYNTHESIZER
-     ══════════════════════════════════════════════════════════ */
-  const FlashaAudio = (() => {
-    let _ctx    = null;
-    let _master = null;
-    let _ready  = false;
+  <div class="fl-intro-badge" aria-hidden="true">
+    <span class="fl-badge-dot"></span>
+    <span class="fl-badge-text">Design Signature System&nbsp;·&nbsp;v4.1</span>
+    <span class="fl-badge-dot"></span>
+  </div>
 
-    const ctx = () => {
-      if (!_ctx) {
-        try {
-          _ctx = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (_) { return null; }
-      }
-      if (_ctx.state === 'suspended') _ctx.resume().catch(() => {});
-      return _ctx;
-    };
+</div>
 
-    const master = () => {
-      const c = ctx();
-      if (!c) return null;
-      if (!_master || _master.context !== c) {
-        _master = c.createGain();
-        _master.gain.value = 0.16;
-        _master.connect(c.destination);
-      }
-      return _master;
-    };
 
-    const adsr = (g, c, opts = {}) => {
-      const {
-        peak = 1, attack = .004, decay = .08, sustain = .20, release = .18,
-      } = opts;
-      const now = c.currentTime;
-      g.gain.cancelScheduledValues(now);
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(peak,           now + attack);
-      g.gain.linearRampToValueAtTime(peak * sustain, now + attack + decay);
-      g.gain.setValueAtTime(peak * sustain,          now + attack + decay);
-      g.gain.linearRampToValueAtTime(0,              now + attack + decay + release);
-    };
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  B — FAB + SOCIAL MENU                                  ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<div id="fl-fab-root"
+     role="navigation"
+     aria-label="Flasha — Social Links">
 
-    const guard = (fn) => (...args) => {
-      if (!SoundPref.isEnabled()) return;
-      fn(...args);
-    };
+  <div id="fl-fab-menu"
+       role="menu"
+       aria-hidden="true"
+       aria-label="Connect with Flasha">
 
-    /* ── Soft tick (hover) ── */
-    const _tick = () => {
-      const c = ctx(), m = master();
-      if (!c || !m) return;
-      const osc = c.createOscillator();
-      const env = c.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 1240;
-      osc.connect(env); env.connect(m);
-      adsr(env, c, { peak: 1, attack: .003, decay: .035, sustain: 0, release: .055 });
-      osc.start(c.currentTime);
-      osc.stop(c.currentTime + .10);
-    };
+    <div class="fl-panel-bar" aria-hidden="true"></div>
 
-    /* ── Satisfying pop (FAB toggle) ── */
-    const _pop = () => {
-      const c = ctx(), m = master();
-      if (!c || !m) return;
-      [
-        { freq: 540, type: 'sine',     peakMult: 1.0 },
-        { freq: 270, type: 'triangle', peakMult: 0.55 },
-      ].forEach(({ freq, type, peakMult }) => {
-        const osc = c.createOscillator();
-        const env = c.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, c.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(freq * .52, c.currentTime + .20);
-        osc.connect(env); env.connect(m);
-        adsr(env, c, { peak: peakMult, attack: .005, decay: .10, sustain: .12, release: .24 });
-        osc.start(c.currentTime);
-        osc.stop(c.currentTime + .40);
-      });
-    };
+    <div class="fl-panel-head">
+      <div class="fl-panel-head-left">
+        <span class="fl-panel-emoji" role="img" aria-label="Flasha">🎴</span>
+        <div class="fl-panel-brand">
+          <span class="fl-panel-name">Flasha</span>
+          <span class="fl-panel-tagline">Connect with me</span>
+        </div>
+      </div>
+      <div class="fl-panel-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+    </div>
 
-    /* ── Rising whoosh (intro exit) ── */
-    const _whoosh = () => {
-      const c = ctx(), m = master();
-      if (!c || !m) return;
-      const car = c.createOscillator();
-      const env = c.createGain();
-      car.type = 'sine';
-      car.frequency.setValueAtTime(160, c.currentTime);
-      car.frequency.exponentialRampToValueAtTime(960, c.currentTime + .60);
-      car.connect(env); env.connect(m);
-      adsr(env, c, { peak: 1, attack: .018, decay: .22, sustain: .38, release: .42 });
-      const mod     = c.createOscillator();
-      const modGain = c.createGain();
-      mod.frequency.value = 9;
-      modGain.gain.value  = 22;
-      mod.connect(modGain); modGain.connect(car.frequency);
-      car.start(c.currentTime); car.stop(c.currentTime + .85);
-      mod.start(c.currentTime); mod.stop(c.currentTime + .85);
-    };
+    <div class="fl-panel-divider" aria-hidden="true"></div>
 
-    /* ── Warm click (first-visit intro) ── */
-    const _introClick = () => {
-      const c = ctx(), m = master();
-      if (!c || !m) return;
-      const bufLen = Math.floor(c.sampleRate * .045);
-      const buf    = c.createBuffer(1, bufLen, c.sampleRate);
-      const data   = buf.getChannelData(0);
-      for (let i = 0; i < bufLen; i++) {
-        data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
-      }
-      const src = c.createBufferSource();
-      src.buffer = buf;
-      const bpf = c.createBiquadFilter();
-      bpf.type            = 'bandpass';
-      bpf.frequency.value = 640;
-      bpf.Q.value         = 1.1;
-      const env = c.createGain();
-      adsr(env, c, { peak: 1, attack: .002, decay: .022, sustain: 0, release: .038 });
-      src.connect(bpf); bpf.connect(env); env.connect(m);
-      src.start(c.currentTime);
-    };
+    <ul class="fl-link-list" role="none">
 
-    const unlock = () => {
-      if (_ready) return;
-      _ready = true;
-      ctx();
-    };
+      <!-- PWA Install — hidden until browser fires beforeinstallprompt -->
+      <li id="fl-pwa-install-item" role="none" style="display:none">
+        <a href="#"
+           id="fl-pwa-install-btn"
+           class="fl-link fl-link--pwa"
+           role="menuitem"
+           aria-label="Install app on your device">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 16V4"/>
+              <path d="M8 12l4 4 4-4"/>
+              <rect x="3" y="18" width="18" height="3" rx="1.5"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">Install App</span>
+            <span class="fl-link-handle">Work offline · No browser needed</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-    return {
-      tick:       guard(_tick),
-      pop:        guard(_pop),
-      whoosh:     guard(_whoosh),
-      introClick: guard(_introClick),
-      unlock,
-    };
-  })();
+      <!-- YouTube -->
+      <li role="none">
+        <a href="https://youtube.com/@flasha_0?si=Am46gTJ9Hk3lyHEV"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--yt"
+           role="menuitem"
+           aria-label="Flasha on YouTube (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">YouTube</span>
+            <span class="fl-link-handle">@flasha_0</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-  /* ══════════════════════════════════════════════════════════
-     § 3  INTRO / LOADING SCREEN
-     ══════════════════════════════════════════════════════════ */
-  const initIntro = () => {
-    const intro = qs(`#${CFG.introId}`);
-    if (!intro) return;
+      <!-- Instagram -->
+      <li role="none">
+        <a href="https://www.instagram.com/flasha_0/"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--ig"
+           role="menuitem"
+           aria-label="Flasha on Instagram (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">Instagram</span>
+            <span class="fl-link-handle">@flasha_0</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-    const isReturn = sessionStorage.getItem(CFG.sessionKey) === '1';
-    if (isReturn) intro.classList.add(CFG.introReturnClass);
+      <!-- Discord -->
+      <li role="none">
+        <a href="https://discord.com/users/1484153478421942335"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--dc"
+           role="menuitem"
+           aria-label="Flasha on Discord (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.079.11 18.1.128 18.113a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">Discord</span>
+            <span class="fl-link-handle">Flasha_0</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-    const startMs = performance.now();
-    const barEl   = intro.querySelector('[role="progressbar"]');
+      <!-- WhatsApp -->
+      <li role="none">
+        <a href="https://api.whatsapp.com/send/?phone=201019953525"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--wa"
+           role="menuitem"
+           aria-label="Contact Flasha on WhatsApp (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">WhatsApp</span>
+            <span class="fl-link-handle">+20 101 995 3525</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-    /* ── Real-time progress driven by rAF ── */
-    let rafId;
-    const tick = () => {
-      const elapsed  = performance.now() - startMs;
-      const progress = Math.min(elapsed / CFG.introMinMs, 1);
+      <!-- Telegram -->
+      <li role="none">
+        <a href="https://t.me/Flasha_0"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--tg"
+           role="menuitem"
+           aria-label="Flasha on Telegram (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">Telegram</span>
+            <span class="fl-link-handle">@Flasha_0</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-      // Drive CSS custom property → bar fill + dot move via CSS
-      intro.style.setProperty('--fl-progress', progress.toFixed(4));
-      barEl?.setAttribute('aria-valuenow', Math.round(progress * 100));
+      <!-- GitHub -->
+      <li role="none">
+        <a href="https://github.com/Flasha-0"
+           target="_blank" rel="noopener noreferrer"
+           class="fl-link fl-link--gh"
+           role="menuitem"
+           aria-label="Flasha on GitHub (opens in new tab)">
+          <span class="fl-link-chip" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </span>
+          <span class="fl-link-body">
+            <span class="fl-link-name">GitHub</span>
+            <span class="fl-link-handle">Flasha-0</span>
+          </span>
+          <span class="fl-link-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 8h10M9 4l4 4-4 4"/>
+            </svg>
+          </span>
+        </a>
+      </li>
 
-      if (progress < 1) {
-        rafId = requestAnimationFrame(tick);
-      }
-    };
-    rafId = requestAnimationFrame(tick);
+    </ul>
 
-    const dismiss = () => {
-      const elapsed   = performance.now() - startMs;
-      const remaining = Math.max(0, CFG.introMinMs - elapsed);
+    <div class="fl-panel-foot" aria-hidden="true">
+      <span class="fl-panel-foot-rule"></span>
+      <span class="fl-panel-foot-label">Crafted by Flasha 🎴</span>
+      <span class="fl-panel-foot-rule"></span>
+    </div>
 
-      setTimeout(() => {
-        cancelAnimationFrame(rafId);
-        intro.style.setProperty('--fl-progress', '1');
-        barEl?.setAttribute('aria-valuenow', 100);
+  </div>
 
-        if (isReturn) {
-          FlashaAudio.whoosh();
-        } else {
-          FlashaAudio.introClick();
-          setTimeout(FlashaAudio.whoosh, 130);
-        }
+  <button id="fl-fab-btn"
+          type="button"
+          aria-label="Open Flasha social links"
+          aria-expanded="false"
+          aria-controls="fl-fab-menu"
+          aria-haspopup="true">
+    <span class="fl-fab-halo fl-fab-halo--a" aria-hidden="true"></span>
+    <span class="fl-fab-halo fl-fab-halo--b" aria-hidden="true"></span>
+    <span class="fl-fab-face" aria-hidden="true">
+      <span class="fl-fab-ico fl-fab-ico--brand">🎴</span>
+      <span class="fl-fab-ico fl-fab-ico--close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6"  x2="6"  y2="18"/>
+          <line x1="6"  y1="6"  x2="18" y2="18"/>
+        </svg>
+      </span>
+    </span>
+  </button>
 
-        try { sessionStorage.setItem(CFG.sessionKey, '1'); } catch (_) {}
+</div>
 
-        intro.classList.add(CFG.introOutClass);
-        onTransitionEnd(intro, () => {
-          if (intro.isConnected) intro.remove();
-        }, CFG.introFadeMs + 250);
 
-      }, remaining);
-    };
-
-    if (document.readyState === 'complete') {
-      dismiss();
-    } else {
-      window.addEventListener('load', dismiss, { once: true });
-    }
-  };
-
-  /* ══════════════════════════════════════════════════════════
-     § 4  FAB + MENU
-     ══════════════════════════════════════════════════════════ */
-  const initFab = () => {
-    const btn  = qs(`#${CFG.fabBtnId}`);
-    const menu = qs(`#${CFG.fabMenuId}`);
-    if (!btn || !menu) return;
-
-    let isOpen = false;
-
-    const focusable = () =>
-      qsa('a[href]:not([tabindex="-1"]), button:not([disabled])', menu);
-
-    /* ── Open ── */
-    const open = () => {
-      isOpen = true;
-      FlashaAudio.pop();
-      menu.classList.add(CFG.menuOpenClass);
-      btn.setAttribute('aria-expanded', 'true');
-      btn.setAttribute('aria-label', 'Close Flasha social links');
-      menu.setAttribute('aria-hidden', 'false');
-      const items = focusable();
-      if (items.length) setTimeout(() => items[0].focus(), 100);
-    };
-
-    /* ── Close ── */
-    const close = (returnFocus = true) => {
-      isOpen = false;
-      FlashaAudio.pop();
-      menu.classList.remove(CFG.menuOpenClass);
-      btn.setAttribute('aria-expanded', 'false');
-      btn.setAttribute('aria-label', 'Open Flasha social links');
-      menu.setAttribute('aria-hidden', 'true');
-      if (returnFocus) btn.focus();
-    };
-
-    const toggle = () => (isOpen ? close() : open());
-
-    /* ── FAB click ── */
-    btn.addEventListener('click', () => {
-      FlashaAudio.unlock();
-      toggle();
-    });
-
-    /* ── FAB hover tick (throttled) ── */
-    let fabHoverReady = true;
-    btn.addEventListener('mouseenter', () => {
-      if (!fabHoverReady) return;
-      fabHoverReady = false;
-      FlashaAudio.tick();
-      setTimeout(() => { fabHoverReady = true; }, 380);
-    });
-
-    /* ── Outside click ── */
-    document.addEventListener('pointerdown', (e) => {
-      if (!isOpen) return;
-      const root = qs('#fl-fab-root');
-      if (root && !root.contains(e.target)) close(false);
-    });
-
-    /* ── Escape key ── */
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen) close();
-    });
-
-    /* ── focusout trap: close if focus leaves root ── */
-    qs('#fl-fab-root')?.addEventListener('focusout', (e) => {
-      if (!isOpen) return;
-      const root = qs('#fl-fab-root');
-      // relatedTarget = element receiving focus
-      if (root && !root.contains(e.relatedTarget)) {
-        // small delay so click handlers fire first
-        setTimeout(() => { if (isOpen) close(false); }, 80);
-      }
-    });
-
-    /* ── Tab trap ── */
-    menu.addEventListener('keydown', (e) => {
-      if (!isOpen) return;
-      const items = focusable();
-      if (!items.length) return;
-      const first = items[0];
-      const last  = items[items.length - 1];
-
-      if (e.key === 'Tab') {
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault(); last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault(); first.focus();
-        }
-      }
-
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        const idx  = items.indexOf(document.activeElement);
-        const step = e.key === 'ArrowDown' ? 1 : -1;
-        items[(idx + step + items.length) % items.length].focus();
-      }
-    });
-
-    /* ── Link hover sounds + auto-close ── */
-    qsa('.fl-link', menu).forEach((link) => {
-      let hoverReady = true;
-      link.addEventListener('mouseenter', () => {
-        if (!hoverReady) return;
-        hoverReady = false;
-        FlashaAudio.tick();
-        setTimeout(() => { hoverReady = true; }, 330);
-      });
-      link.addEventListener('click', () => {
-        setTimeout(() => close(false), 220);
-      });
-    });
-
-    /* ── Footer link hover sound ── */
-    const footerLink = qs('.fl-footer-link');
-    if (footerLink) {
-      let ready = true;
-      footerLink.addEventListener('mouseenter', () => {
-        if (!ready) return;
-        ready = false;
-        FlashaAudio.tick();
-        setTimeout(() => { ready = true; }, 380);
-      });
-    }
-
-    /* ── Haptic feedback on mobile ── */
-    btn.addEventListener('click', () => {
-      if ('vibrate' in navigator) {
-        try { navigator.vibrate(8); } catch (_) {}
-      }
-    });
-
-    /* ── Global audio unlock ── */
-    document.addEventListener('pointerdown', FlashaAudio.unlock, { once: true });
-    document.addEventListener('keydown',     FlashaAudio.unlock, { once: true });
-  };
-
-  /* ══════════════════════════════════════════════════════════
-     § 5  CONSOLE EASTER EGG
-     ══════════════════════════════════════════════════════════ */
-  const initConsole = () => {
-
-    const BASE = [
-      'background:#05050f',
-      'font-family:"SF Mono","Fira Code",monospace',
-      'display:block',
-    ].join(';');
-
-    const S = {
-      banner: [
-        'background:linear-gradient(135deg,#a855f7 0%,#ec4899 55%,#06b6d4 100%)',
-        'color:#fff',
-        'font-size:16px',
-        'font-weight:900',
-        'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif',
-        'letter-spacing:.24em',
-        'text-transform:uppercase',
-        'padding:18px 40px',
-        'border-radius:14px 14px 0 0',
-        'text-shadow:0 2px 14px rgba(0,0,0,.40)',
-        'display:block',
-      ].join(';'),
-      sub:     `${BASE};color:rgba(240,238,255,.38);font-size:9px;letter-spacing:.30em;padding:6px 40px`,
-      ascii:   `${BASE};color:#a855f7;font-size:9px;line-height:1.55;padding:12px 40px 8px`,
-      rule:    `${BASE};color:rgba(168,85,247,.35);font-size:10px;padding:4px 40px`,
-      greet:   `${BASE};color:rgba(240,238,255,.72);font-size:11.5px;padding:5px 40px 3px`,
-      accent:  `${BASE};color:#a855f7;font-weight:700;font-size:11.5px;padding:3px 40px`,
-      gold:    `${BASE};color:#c8aa6e;font-size:10.5px;font-style:italic;font-family:Georgia,serif;letter-spacing:.09em;padding:7px 40px 10px`,
-      secHead: `${BASE};color:rgba(240,238,255,.26);font-size:8px;letter-spacing:.32em;text-transform:uppercase;padding:12px 40px 5px`,
-      lbl:     `${BASE};color:rgba(240,238,255,.52);font-size:10.5px;padding:3px 40px 3px 50px`,
-      mkLink:  (col) => `${BASE};color:${col};font-size:10.5px;text-decoration:underline;padding:2px 40px 6px 50px;text-shadow:0 0 12px ${col}88`,
-      foot:    `${BASE};color:rgba(240,238,255,.16);font-size:9px;letter-spacing:.16em;padding:12px 40px 18px;border-radius:0 0 14px 14px`,
-    };
-
-    const ascii = [
-      ' _____ _           _',
-      '|  ___| | __ _ ___| |__   __ _',
-      "| |_  | |/ _` / __| '_ \\ / _` |",
-      '|  _| | | (_| \\__ \\ | | | (_| |',
-      '|_|   |_|\\__,_|___/_| |_|\\__,_|',
-    ].join('\n');
-
-    const HR = '─'.repeat(46);
-
-    /* eslint-disable no-console */
-    console.log('%c🎴  F L A S H A',                        S.banner);
-    console.log('%cDesign Signature System  ·  v4.1.0',     S.sub);
-    console.log(`%c${ascii}`,                               S.ascii);
-    console.log(`%c${HR}`,                                  S.rule);
-    console.log('%c 👋  Hey, developer — welcome.',          S.greet);
-    console.log('%c    You found the source code.',           S.greet);
-    console.log('%c    Built with precision & purpose.',      S.accent);
-    console.log('%c "A Bespoke Creation of Flasha"',          S.gold);
-    console.log(`%c${HR}`,                                  S.rule);
-    console.log('%c ◈  SOCIAL CHANNELS',                     S.secHead);
-    console.log('%c ▶  YouTube',    S.lbl);
-    console.log(`%c    ${LINKS.youtube}`,                    S.mkLink('#ff4444'));
-    console.log('%c 📷  Instagram',  S.lbl);
-    console.log(`%c    ${LINKS.instagram}`,                  S.mkLink('#e1306c'));
-    console.log('%c 💬  Discord',    S.lbl);
-    console.log(`%c    ${LINKS.discord}`,                    S.mkLink('#5865f2'));
-    console.log('%c 📱  WhatsApp',   S.lbl);
-    console.log(`%c    ${LINKS.whatsapp}`,                   S.mkLink('#22c55e'));
-    console.log('%c ✈  Telegram',   S.lbl);
-    console.log(`%c    ${LINKS.telegram}`,                   S.mkLink('#2aabee'));
-    console.log('%c 💻  GitHub',     S.lbl);
-    console.log(`%c    ${LINKS.github}`,                     S.mkLink('#c9d1d9'));
-    console.log(`%c${HR}`,                                  S.rule);
-    console.log('%c  © 2025 Flasha 🎴 · All rights reserved.', S.foot);
-    /* eslint-enable no-console */
-  };
-
-  /* ══════════════════════════════════════════════════════════
-     § 6  BOOT
-     ══════════════════════════════════════════════════════════ */
-  const boot = () => {
-    initIntro();
-    initFab();
-    initConsole();
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    boot();
-  }
-
-  /* ── Expose SoundPref publicly for host page integration ── */
-  window.FlashaSoundPref = SoundPref;
-
-})();
+<!-- ╔══════════════════════════════════════════════════════════╗
+     ║  C — FOOTER                                             ║
+     ╚══════════════════════════════════════════════════════════╝ -->
+<footer id="fl-footer" role="contentinfo">
+  <div class="fl-footer-shimmer" aria-hidden="true"></div>
+  <div class="fl-footer-inner">
+    <span class="fl-footer-rule"  aria-hidden="true"></span>
+    <p class="fl-footer-copy">
+      Crafted by&nbsp;
+      <a href="https://github.com/Flasha-0"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="fl-footer-link"
+         aria-label="Flasha on GitHub (opens in new tab)">
+        Flasha&nbsp;<span aria-hidden="true">🎴</span>
+      </a>
+    </p>
+    <span class="fl-footer-rule" aria-hidden="true"></span>
+  </div>
+</footer>
